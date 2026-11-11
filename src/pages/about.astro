@@ -1,0 +1,7 @@
+---
+import Base from '../layouts/Base.astro';
+import { site, pathFor } from '../lib/site';
+---
+<Base title="关于" description="关于 Winston’s Notebook。">
+  <div class="wrap about-page"><a class="back-link" href={pathFor()}>← 返回首页</a><div class="about-grid"><div><div class="eyebrow"><span class="eyebrow-line"></span> ABOUT THIS SPACE</div><h1>A little space<br /><em>to think.</em></h1><p class="about-lead">你好，欢迎来到<br />Winston’s Notebook。</p></div><div class="about-copy"><span class="section-kicker">A PERSONAL NOTEBOOK / 关于</span><p>这里是一个留给文字、问题与好奇心的地方。写下值得记住的事，也为尚未找到答案的问题留一点空间。</p><p>文章会慢慢更新。希望你在这里读到有趣的想法，也能找到属于自己的灵感。</p><div class="about-divider"></div><p>如果你愿意，也可以到 GitHub 参与讨论。</p><a class="primary-button" href={site.discussions} target="_blank" rel="noopener noreferrer">前往 Discussions <span>↗</span></a></div></div></div>
+</Base>

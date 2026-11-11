@@ -1,0 +1,12 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDate, imageUrl, postUrl, readingTime } from '../lib/site';
+interface Props { post: CollectionEntry<'blog'>; index?: number; }
+const { post, index = 0 } = Astro.props;
+const words = [post.data.title, post.data.description, ...post.data.tags, post.body || ''].join(' ').toLowerCase();
+---
+<article class="post-row" data-post data-search={words} data-tags={JSON.stringify(post.data.tags)}>
+  <a class="post-image" href={postUrl(post)} tabindex="-1" aria-hidden="true"><img src={imageUrl(post.data.cover)} alt="" loading="lazy" /></a>
+  <div class="post-info"><div class="post-meta"><span>{post.data.tags[0] || '随笔'}</span><span class="meta-dot">·</span><time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time><span class="meta-dot">·</span><span>{readingTime(post.body)} 分钟阅读</span></div><h3><a href={postUrl(post)}>{post.data.title}</a></h3><p>{post.data.description || '打开这篇文章，继续阅读。'}</p><a class="read-link" href={postUrl(post)}>阅读全文 <span aria-hidden="true">↗</span></a></div>
+  <span class="post-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+</article>

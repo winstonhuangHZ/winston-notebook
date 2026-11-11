@@ -1,0 +1,23 @@
+{
+  "name": "winston-notebook",
+  "version": "1.0.0",
+  "description": "A personal notebook powered by Markdown and GitHub Discussions.",
+  "scripts": {
+    "dev": "npm run sync && astro dev --host 127.0.0.1",
+    "build": "npm run sync && astro build",
+    "preview": "astro preview --host 127.0.0.1",
+    "sync": "node scripts/sync-discussions.mjs"
+  },
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^5.18.2",
+    "gray-matter": "^4.0.3",
+    "katex": "^0.19.1",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
+    "unist-util-visit": "^5.2.0"
+  }
+}

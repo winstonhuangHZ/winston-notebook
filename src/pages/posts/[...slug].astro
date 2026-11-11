@@ -1,0 +1,25 @@
+---
+import { render } from 'astro:content';
+import 'katex/dist/katex.min.css';
+import Base from '../../layouts/Base.astro';
+import { publishedPosts, pathFor, postUrl, formatDate, imageUrl, readingTime } from '../../lib/site';
+export async function getStaticPaths() {
+  return (await publishedPosts()).map(post => ({ params: { slug: post.id }, props: { post } }));
+}
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+const toc = headings.filter(h => h.depth === 2 || h.depth === 3);
+const posts = await publishedPosts();
+const otherPosts = posts.filter(p => p.id !== post.id).slice(0, 2);
+---
+<Base title={post.data.title} description={post.data.description} image={imageUrl(post.data.cover)}>
+  <article class="wrap article-page"><a href={`${pathFor()}#writing`} class="back-link">← 返回全部文章</a><header class="article-header"><div class="section-kicker">THE NOTEBOOK / {post.data.tags[0] || '随笔'}</div><h1>{post.data.title}</h1>{post.data.description && <p class="article-deck">{post.data.description}</p>}<div class="article-byline"><span class="mini-mark">W.</span><span><strong>Winston</strong><br /><time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time><span> · {readingTime(post.body)} 分钟阅读</span></span></div></header>
+    <div class="article-cover"><img src={imageUrl(post.data.cover)} alt={post.data.coverAlt || '文章封面'} /></div>
+    <div class="article-layout"><div class="article-main"><div class="prose"><Content /></div><div class="article-tags">{post.data.tags.map(tag => <span>#{tag}</span>)}</div><div class="article-end"><div><span class="section-kicker">END OF THIS PAGE</span><p>感谢阅读。保持好奇，我们下篇见。</p></div><div class="article-actions"><button type="button" class="copy-link">复制链接 ↗</button>{post.data.discussionUrl && <a href={post.data.discussionUrl} target="_blank" rel="noopener noreferrer">参与讨论 ↗</a>}</div></div></div>{toc.length > 0 && <aside class="toc" aria-label="文章目录"><span>ON THIS PAGE</span><nav>{toc.map(heading => <a class:list={[heading.depth === 3 && 'toc-sub']} href={`#${heading.slug}`}>{heading.text}</a>)}</nav></aside>}</div>
+    {otherPosts.length > 0 && <section class="more-posts"><div class="section-heading"><div><span class="section-kicker">KEEP READING</span><h2>More <em>to explore.</em></h2></div></div><div class="more-grid">{otherPosts.map(item => <a href={postUrl(item)}><span>{item.data.tags[0] || '随笔'} · {formatDate(item.data.pubDate)}</span><h3>{item.data.title} ↗</h3><p>{item.data.description}</p></a>)}</div></section>}
+  </article>
+  <script>
+    const copy = document.querySelector<HTMLButtonElement>('.copy-link');
+    copy?.addEventListener('click', async () => { try { await navigator.clipboard.writeText(location.href); copy.textContent = '已复制 ✓'; setTimeout(() => { copy.textContent = '复制链接 ↗'; }, 2200); } catch { copy.textContent = '请从地址栏复制'; } });
+  </script>
+</Base>

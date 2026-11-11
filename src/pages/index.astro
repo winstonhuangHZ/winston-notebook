@@ -1,0 +1,38 @@
+---
+import Base from '../layouts/Base.astro';
+import PostCard from '../components/PostCard.astro';
+import { publishedPosts, pathFor } from '../lib/site';
+const posts = await publishedPosts();
+const tags = [...new Set(posts.flatMap(post => post.data.tags))].sort((a,b) => a.localeCompare(b, 'zh-CN'));
+---
+<Base>
+  <section class="wrap hero" aria-labelledby="hero-title">
+    <div class="hero-copy"><div class="eyebrow"><span class="eyebrow-line"></span> A PERSONAL NOTEBOOK <span class="small-spark">✳</span></div><h1 id="hero-title">Ideas worth<br /><em>keeping.</em></h1><p class="hero-chinese">在这里，慢慢想，认真写。</p><p class="hero-description">记录问题，也记录寻找答案的过程。<br />一些想法、发现，以及值得回味的文字。</p><a class="primary-button" href="#writing">探索文章 <span aria-hidden="true">↗</span></a><div class="hero-footnote"><span>WRITTEN WITH CURIOSITY</span><span class="footnote-star">✳</span></div></div>
+    <div class="hero-art"><img src={pathFor('images/cover-notes.svg')} alt="抽象插画：淡色太阳和层叠的绿色山丘" /><div class="art-caption"><span>01 / A QUIET CORNER</span><span>TAKE YOUR TIME ↗</span></div></div>
+  </section>
+  <div class="wrap"><div class="motto"><span>THOUGHTS, NOTES & OTHER THINGS</span><span class="motto-asterisk" aria-hidden="true">✳</span><span>ONE PAGE AT A TIME</span></div></div>
+  <section class="wrap writing-section" id="writing" aria-labelledby="writing-title">
+    <div class="section-heading"><div><span class="section-kicker">THE NOTEBOOK / 文章</span><h2 id="writing-title">The latest <em>pages.</em></h2><p>一些刚刚落在纸上的想法。</p></div><div class="article-count"><span>{String(posts.length).padStart(2,'0')}</span><small>篇文章<br />AND COUNTING</small></div></div>
+    <div class="filter-bar"><div class="filter-tags" aria-label="按标签筛选"><button class="filter-tag active" type="button" data-filter="all" aria-pressed="true">全部</button>{tags.map(tag => <button class="filter-tag" type="button" data-filter={tag} aria-pressed="false">{tag}</button>)}</div><label class="search-box"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.7" cy="10.7" r="6.5"/><path d="m16 16 4.2 4.2"/></svg><span class="sr-only">搜索文章</span><input id="post-search" type="search" placeholder="搜索文章..." autocomplete="off" /><kbd>/</kbd></label></div>
+    <div class="posts-list">{posts.map((post,index) => <PostCard post={post} index={index} />)}</div>
+    <p class="no-results" hidden>没有找到符合条件的文章。试试其他关键词或标签。</p>
+    {posts.length === 0 && <p class="empty-state">第一篇文章还在路上。</p>}
+  </section>
+  <section class="wrap closing-note"><div><span class="section-kicker">A NOTE FROM THIS CORNER</span><h2>Stay curious.<br /><em>Keep wondering.</em></h2></div><div><p>这里是一个记录和分享的地方。<br />愿每一次阅读，都能带来一点新的发现。</p><a href={pathFor('about/')} class="text-arrow">关于这个小站 <span>↗</span></a></div><span class="closing-star" aria-hidden="true">✳</span></section>
+  <script>
+    const input = document.querySelector<HTMLInputElement>('#post-search');
+    const buttons = [...document.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+    const rows = [...document.querySelectorAll<HTMLElement>('[data-post]')];
+    const empty = document.querySelector<HTMLElement>('.no-results');
+    let active = 'all';
+    const apply = () => {
+      const query = (input?.value || '').trim().toLocaleLowerCase();
+      let visible = 0;
+      rows.forEach(row => { const tags: string[] = JSON.parse(row.dataset.tags || '[]'); const show = (active === 'all' || tags.includes(active)) && (row.dataset.search || '').toLocaleLowerCase().includes(query); row.hidden = !show; if (show) visible++; });
+      if (empty) empty.hidden = visible > 0 || rows.length === 0;
+    };
+    input?.addEventListener('input', apply);
+    buttons.forEach(button => button.addEventListener('click', () => { active = button.dataset.filter || 'all'; buttons.forEach(b => { const selected = b === button; b.classList.toggle('active', selected); b.setAttribute('aria-pressed', String(selected)); }); apply(); }));
+    document.addEventListener('keydown', event => { if (event.key === '/' && !event.metaKey && !event.ctrlKey && !event.altKey && !['INPUT','TEXTAREA'].includes((event.target as HTMLElement)?.tagName) && !(event.target as HTMLElement)?.isContentEditable) { event.preventDefault(); input?.focus(); } });
+  </script>
+</Base>
