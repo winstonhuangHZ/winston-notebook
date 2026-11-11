@@ -4,3 +4,5 @@ dist/
 .DS_Store
 .env*
 src/content/blog/generated/
+public/pdfjs/
+public/files/_discussion/

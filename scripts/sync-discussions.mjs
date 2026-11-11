@@ -1,11 +1,14 @@
 import { execFileSync } from 'node:child_process';
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import matter from 'gray-matter';
+import { fileURLToPath } from 'node:url';
+import { mirrorGithubPdfs, pruneMirroredPdfs } from './discussion-attachments.mjs';
 
 const owner = 'winstonhuangHZ';
 const repository = 'winston-notebook';
 const categoryName = 'Announcements';
 const output = new URL('../src/content/blog/generated/', import.meta.url);
+const attachmentDirectory = fileURLToPath(new URL('../public/files/_discussion/', import.meta.url));
 if (process.env.SKIP_DISCUSSIONS === '1') {
   console.log('Skipping Discussions sync (SKIP_DISCUSSIONS=1).');
   process.exit(0);
@@ -35,10 +38,11 @@ do {
 } while (cursor);
 
 // Fully parse first; failed syncs must not deploy an empty or partial snapshot.
-const files = discussions.map(d => {
+const files = [];
+for (const d of discussions) {
   const parsed = matter(d.body || '');
   const metadata = parsed.data;
-  if (metadata.draft === true) return null;
+  if (metadata.draft === true) continue;
   if (metadata.tags !== undefined && (!Array.isArray(metadata.tags) || !metadata.tags.every(t => typeof t === 'string'))) throw new Error(`Discussion #${d.number}: tags 必须是字符串数组。`);
   for (const key of ['description','cover','coverAlt']) if (metadata[key] !== undefined && typeof metadata[key] !== 'string') throw new Error(`Discussion #${d.number}: ${key} 必须是字符串。`);
   const plain = parsed.content.replace(/```[\s\S]*?```/g, ' ').replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/[#>*_`~|\n\r]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -53,9 +57,12 @@ const files = discussions.map(d => {
   if (metadata.cover) front.cover = metadata.cover;
   if (metadata.coverAlt) front.coverAlt = metadata.coverAlt;
   const yaml = Object.entries(front).map(([key,value]) => `${key}: ${JSON.stringify(value)}`).join('\n');
-  return { name: `discussion-${d.number}.md`, content: `---\n${yaml}\n---\n${parsed.content.trim()}\n` };
-}).filter(Boolean);
+  const mirrored = await mirrorGithubPdfs(parsed.content, { directory: attachmentDirectory });
+  for (const warning of mirrored.warnings) console.warn(`Discussion #${d.number}: ${warning}`);
+  files.push({ name: `discussion-${d.number}.md`, content: `---\n${yaml}\n---\n${mirrored.markdown.trim()}\n`, assets: mirrored.assets });
+}
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
 await Promise.all(files.map(file => writeFile(new URL(file.name, output), file.content, 'utf8')));
+await pruneMirroredPdfs(attachmentDirectory, files.flatMap(file => file.assets));
 console.log(`已同步 ${files.length} 篇 Discussions 文章。`);

@@ -30,7 +30,7 @@ const shareImage = new URL(image || pathFor('images/cover-notes.svg'), Astro.sit
     <div class="wrap header-inner">
       <a class="brand" href={pathFor()} aria-label="Winston's Notebook 首页"><span class="brand-mark">W.</span><span class="brand-name">WINSTON’S <span>NOTEBOOK</span></span></a>
       <nav aria-label="主导航" class="nav-links">
-        <a href={pathFor()}>首页</a><a href={`${pathFor()}#writing`}>文章</a><a href={pathFor('about/')}>关于</a>
+        <a href={pathFor()}>首页</a><a href={`${pathFor()}#writing`}>文章</a><a href={pathFor('about/')}>关于</a><a href={`${site.discussions}/new?category=announcements`} target="_blank" rel="noopener noreferrer">写文章 ↗</a>
       </nav>
       <div class="header-actions">
         <a class="icon-button search-link" href={`${pathFor()}#writing`} aria-label="搜索文章" title="搜索文章"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.7" cy="10.7" r="6.5"/><path d="m16 16 4.2 4.2"/></svg></a>

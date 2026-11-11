@@ -19,6 +19,7 @@ const otherPosts = posts.filter(p => p.id !== post.id).slice(0, 2);
     {otherPosts.length > 0 && <section class="more-posts"><div class="section-heading"><div><span class="section-kicker">KEEP READING</span><h2>More <em>to explore.</em></h2></div></div><div class="more-grid">{otherPosts.map(item => <a href={postUrl(item)}><span>{item.data.tags[0] || '随笔'} · {formatDate(item.data.pubDate)}</span><h3>{item.data.title} ↗</h3><p>{item.data.description}</p></a>)}</div></section>}
   </article>
   <script>
+    import '../../scripts/pdf-viewer';
     const copy = document.querySelector<HTMLButtonElement>('.copy-link');
     copy?.addEventListener('click', async () => { try { await navigator.clipboard.writeText(location.href); copy.textContent = '已复制 ✓'; setTimeout(() => { copy.textContent = '复制链接 ↗'; }, 2200); } catch { copy.textContent = '请从地址栏复制'; } });
   </script>
